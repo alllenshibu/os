@@ -1,4 +1,4 @@
-org		0x7C00			; BIOS looks for stuff here
+org		0x0		
 bits	16				; 16 bit mode. 8086only has 16 bit registers
 
 ; 0x0D = carriage return
@@ -6,8 +6,14 @@ bits	16				; 16 bit mode. 8086only has 16 bit registers
 %define ENDL 0x0D, 0x0A
 
 start:
-	jmp 	main
 
+	; print message
+	mov 	si, msg_hello
+	call	puts
+
+.halt:
+	cli
+	hlt
 ;
 ; Prints a string to the screen
 ; Params: 
@@ -35,28 +41,5 @@ puts:
     popa            	; Restore registers
     ret
 
-main:
+msg_hello: db 'Hello World from KERNEL', ENDL, 0
 
-	; setup data segments
-	mov 	ax, 0 					; can't write to ds/es directly
-	mov 	ds, ax
-	mov 	es, ax
-
-	; setup stack
-	mov 	ss, ax
-	mov 	sp, 0x7C00				; stack grows down from where we are loaded in memory
-
-	; print message
-	mov 	si, msg_hello
-	call	puts
-
-	hlt
-
-.halt:
-	jmp 	.halt
-
-
-msg_hello: db 'Hello World!', ENDL, 0
-
-times		510-($-$$) db 0
-dw 			0AA55h
